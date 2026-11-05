@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>帝路重尋：南宋末帝「現代香港大冒險」路線設計平台</title>
+  <style>
+    :root {
+      --bg-ocean: #38bdf8;
+      --panel-bg: #ffffff;
+      --card-bg: #f8fafc;
+      --primary-blue: #0284c7;
+      --accent-yellow: #fbbf24;
+      --accent-orange: #f97316;
+      --accent-pink: #ec4899;
+      --accent-green: #10b981;
+      --accent-purple: #8b5cf6;
+      --accent-red: #ef4444;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #cbd5e1;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.05);
+      --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Comic Sans MS', -apple-system, BlinkMacSystemFont, "PingFang HK", "Microsoft JhengHei", sans-serif; }
+    body { background-color: #e0f2fe; color: var(--text-main); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: #fff;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+      z-index: 10;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand h1 { font-size: 1.35rem; letter-spacing: 1px; text-shadow: 1px 2px 4px rgba(0,0,0,0.2); }
+    .brand-badge { background: var(--accent-yellow); color: #78350f; font-weight: bold; font-size: 0.82rem; padding: 4px 12px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+    /* Main Container */
+    .app-container { display: flex; flex: 1; height: calc(100vh - 58px); overflow: hidden; }
+
+    /* Sidebar (Left) */
+    .sidebar {
+      width: 480px;
+      background: var(--panel-bg);
+      border-right: 3px solid #cbd5e1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      box-shadow: 4px 0 15px rgba(0,0,0,0.05);
+    }
+    .section-block { padding: 18px; border-bottom: 2px solid #f1f5f9; }
+    .section-title { font-size: 0.95rem; font-weight: bold; color: var(--primary-blue); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+
+    /* Student Info Section Grid */
+    .roles-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .role-card { background: #f0f9ff; padding: 8px 12px; border-radius: var(--radius-md); border: 2px solid #bae6fd; display: flex; flex-direction: column; }
+    .role-card label { font-size: 0.75rem; font-weight: bold; color: #0369a1; margin-bottom: 2px; }
+    .role-card input { background: #fff; border: 1px solid #7dd3fc; border-radius: 6px; padding: 4px 8px; color: var(--text-main); font-size: 0.85rem; outline: none; }
+
+    /* Presets Chips */
+    .preset-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .chip { 
+      background: #fff; 
+      border: 2px solid #e2e8f0; 
+      padding: 6px 12px; 
+      border-radius: 20px; 
+      font-size: 0.8rem; 
+      font-weight: bold; 
+      cursor: pointer; 
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    }
+    .chip:hover { transform: translateY(-2px); border-color: var(--accent-orange); color: var(--accent-orange); background: #fff7ed; }
+    .chip.highlight { border-color: #0284c7; background: #e0f2fe; color: #0369a1; }
+    .chip.locked-start { border-color: #10b981; background: #dcfce7; color: #166534; cursor: not-allowed; }
+    .chip.locked-end { border-color: #ef4444; background: #fee2e2; color: #991b1b; cursor: not-allowed; }
+
+    /* Route Stations List */
+    .station-list { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+    .station-card {
+      background: #fff;
+      border: 2px solid #e2e8f0;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s;
+    }
+    .station-card.locked-start-card { border-color: #10b981; background: #f0fdf4; }
+    .station-card.locked-end-card { border-color: #ef4444; background: #fef2f2; }
+    .station-card:hover { box-shadow: var(--shadow-md); }
+    .station-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .station-index { background: var(--accent-yellow); color: #78350f; font-weight: bold; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; border: 2px solid #f59e0b; }
+    .station-name { font-weight: bold; font-size: 1rem; color: #0f172a; flex: 1; margin-left: 10px; }
+    .station-badge-lock { font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 12px; margin-left: 8px; }
+    .badge-start { background: #10b981; color: #fff; }
+    .badge-end { background: #ef4444; color: #fff; }
+    
+    .station-controls { display: flex; gap: 4px; }
+    .btn-icon { background: #f1f5f9; border: none; color: var(--text-muted); cursor: pointer; width: 26px; height: 26px; border-radius: 6px; font-weight: bold; }
+    .btn-icon:hover:not(:disabled) { background: #e2e8f0; color: #0f172a; }
+    .btn-icon:disabled { opacity: 0.3; cursor: not-allowed; }
+    
+    .station-body select, .station-body textarea {
+      width: 100%;
+      background: #f8fafc;
+      border: 2px solid #cbd5e1;
+      color: var(--text-main);
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      margin-top: 8px;
+      outline: none;
+      font-weight: 500;
+    }
+    .station-body select:focus, .station-body textarea:focus { border-color: var(--primary-blue); background: #fff; }
+    .station-body textarea { resize: vertical; height: 52px; }
+
+    /* Score Board & Achievements */
+    .score-card { background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%); border: 2px solid #86efac; border-radius: var(--radius-md); padding: 14px; }
+    .score-metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center; }
+    .metric-val { font-size: 1.5rem; font-weight: 900; color: #047857; }
+    .metric-lbl { font-size: 0.75rem; font-weight: bold; color: #065f46; margin-top: 2px; }
+
+    /* Badges List */
+    .badge-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .badge-item { background: #fff; border: 1.5px solid #a7f3d0; padding: 3px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: bold; color: #047857; display: flex; align-items: center; gap: 4px; }
+
+    /* Action Bar */
+    .action-bar { padding: 16px; background: var(--panel-bg); border-top: 2px solid #e2e8f0; margin-top: auto; display: flex; gap: 12px; }
+    .btn { flex: 1; padding: 12px; border-radius: var(--radius-md); border: none; font-weight: bold; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.08); }
+    .btn-primary { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(245, 158, 11, 0.3); }
+    .btn-secondary { background: #fff; color: var(--text-muted); border: 2px solid #cbd5e1; }
+    .btn-secondary:hover { background: #f1f5f9; color: var(--text-main); }
+
+    /* Map Display Area (Right) */
+    .map-container { flex: 1; position: relative; background: var(--bg-ocean); overflow: hidden; display: flex; flex-direction: column; }
+    
+    /* SVG Map Styling */
+    #svg-map { width: 100%; height: 100%; cursor: default; }
+    .map-land { fill: #fef08a; stroke: #ca8a04; stroke-width: 3; transition: fill 0.2s; filter: drop-shadow(0px 6px 10px rgba(0,0,0,0.12)); }
+    .map-land:hover { fill: #fde047; }
+    .map-border-zone { fill: rgba(239, 68, 68, 0.18); stroke: #ef4444; stroke-dasharray: 6,6; stroke-width: 2.5; }
+    .map-label { fill: #1e3a8a; font-size: 14px; font-weight: 900; pointer-events: none; user-select: none; text-shadow: 0 2px 4px rgba(255,255,255,0.9); }
+    .map-feature-label { fill: #0369a1; font-size: 11px; font-weight: 800; pointer-events: none; text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
+    .map-school-label { fill: #d97706; font-size: 12px; font-weight: 900; pointer-events: none; text-shadow: 0 2px 4px rgba(255,255,255,1); }
+    
+    /* SVG Map Interactive Landmark Elements */
+    .map-landmark { cursor: pointer; transition: transform 0.2s; }
+    .map-landmark:hover { transform: scale(1.35); }
+
+    /* SVG Map Route Elements */
+    .route-line { stroke: #f97316; stroke-width: 5; stroke-dasharray: 10; animation: dash 25s linear infinite; fill: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+    @keyframes dash { to { stroke-dashoffset: -1000; } }
+    
+    .station-marker { cursor: pointer; transition: transform 0.2s; }
+    .station-marker:hover { transform: scale(1.3); }
+    .station-marker circle { fill: #0284c7; stroke: #fff; stroke-width: 3.5; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.3)); }
+    .station-marker.start circle { fill: #10b981; }
+    .station-marker.end circle { fill: #ef4444; }
+    .station-marker text { fill: #fff; font-size: 14px; font-weight: 900; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+    .station-tag-label { fill: #0f172a; font-size: 13px; font-weight: 900; text-anchor: start; filter: drop-shadow(0 2px 4px rgba(255,255,255,1)); }
+
+    /* Map Overlay Elements */
+    .map-overlay-top { position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; pointer-events: none; z-index: 5; }
+    .map-title-badge { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); padding: 12px 20px; border-radius: 30px; border: 2px solid #0284c7; pointer-events: auto; box-shadow: var(--shadow-md); }
+    .map-title-badge h2 { font-size: 1.05rem; color: #0369a1; display: flex; align-items: center; gap: 8px; }
+    .map-title-badge p { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; }
+
+    /* Landmark Hint Banner */
+    .landmark-hint-banner {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(15, 23, 42, 0.92);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 25px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      border: 2px solid var(--accent-yellow);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: var(--shadow-md);
+      z-index: 5;
+    }
+
+    .map-controls { position: absolute; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 5; }
+    .map-btn { background: #fff; color: #0369a1; border: 2px solid #0284c7; width: 42px; height: 42px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: bold; box-shadow: var(--shadow-md); transition: transform 0.2s; }
+    .map-btn:hover { transform: scale(1.1); background: #f0f9ff; }
+
+    /* Animated Ship Icon */
+    .ship-icon { transition: all 1s ease-in-out; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
+
+    /* Enemy Alert Banner Toast */
+    .alert-banner {
+      position: absolute;
+      top: 75px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ef4444;
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+      z-index: 10;
+      transition: all 0.3s ease;
+      opacity: 0;
+      pointer-events: none;
+      border: 2px solid #fff;
+    }
+    .alert-banner.active { opacity: 1; transform: translateX(-50%) translateY(10px); }
+
+    /* Modal Report */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); display: none; justify-content: center; align-items: center; z-index: 100; padding: 20px; backdrop-filter: blur(4px); }
+    .modal-backdrop.active { display: flex; }
+    .modal-content { background: #fff; color: #1e293b; width: 100%; max-width: 860px; max-height: 90vh; border-radius: var(--radius-lg); overflow-y: auto; padding: 32px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 4px solid var(--accent-yellow); }
+    .report-header { text-align: center; border-bottom: 3px dashed #e2e8f0; padding-bottom: 18px; margin-bottom: 20px; }
+    .report-header h2 { font-size: 1.8rem; color: #0369a1; margin-bottom: 6px; }
+    .report-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; background: #f0f9ff; padding: 16px; border-radius: var(--radius-md); border: 2px solid #bae6fd; font-size: 0.9rem; }
+    .report-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    .report-table th, .report-table td { border: 1px solid #cbd5e1; padding: 10px; text-align: left; font-size: 0.85rem; }
+    .report-table th { background: #f1f5f9; color: #0369a1; font-weight: bold; }
+
+    /* Report Map Display Box */
+    .report-map-box {
+      width: 100%;
+      height: 360px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 2px solid #0284c7;
+      margin-bottom: 20px;
+      background: #38bdf8;
+      box-shadow: var(--shadow-sm);
+    }
+    .report-map-box svg { width: 100%; height: 100%; }
+
+    /* Print Stylesheet */
+    @media print {
+      body { background: #fff; height: auto; overflow: visible; }
+      header, .app-container { display: none !important; }
+      .modal-backdrop { position: static; background: none; display: block !important; padding: 0; backdrop-filter: none; }
+      .modal-content { max-width: 100%; border: none; box-shadow: none; padding: 0; overflow: visible; }
+      .btn { display: none !important; }
+      .report-map-box { height: 420px; page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Header -->
+  <header>
+    <div class="brand">
+      <h1>⛵ 帝路重尋</h1>
+      <span class="brand-badge">南宋末帝「現代香港大冒險」路線設計平台</span>
+    </div>
+    <div style="font-size: 0.85rem; font-weight: bold; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 12px;">
+      🎓 教學目標：歷史邏輯 × 地理空間 × 現代城市創意
+    </div>
+  </header>
+
+  <div class="app-container">
+    <!-- Left Sidebar -->
+    <div class="sidebar">
+      
+      <!-- 1. Student Info Section -->
+      <div class="section-block">
+        <div class="section-title">📜 第一步：我是現代陸秀夫</div>
+        <div class="roles-grid">
+          <div class="role-card">
+            <label>👤 學生姓名</label>
+            <input type="text" id="student-name" placeholder="請輸入姓名">
+          </div>
+          <div class="role-card">
+            <label>🏫 班別</label>
+            <input type="text" id="student-class" placeholder="例如：2A">
+          </div>
+          <div class="role-card">
+            <label>🔢 學號</label>
+            <input type="text" id="student-no" placeholder="例如：15">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Preset Quick Add -->
+      <div class="section-block">
+        <div class="section-title">📍 地圖快選：點擊選取景點加入中間路線</div>
+        <div class="preset-chips">
+          <div class="chip locked-start" title="第一站固定起點，無法重複新增">🔒 🗿 九龍城宋皇台 (起點)</div>
+          <div class="chip locked-end" title="最後一站固定終點，無法重複新增">🔒 🏝️ 大嶼山 (終點)</div>
+          <div class="chip highlight" onclick="addPreset('荃灣', 22.3706, 114.1150, '天然良港/避風塘')">⚓ 荃灣</div>
+          <div class="chip" onclick="addPreset('棉紡會中學', 22.3582, 114.1264, '補給站')">🏫 棉紡會中學</div>
+          <div class="chip" onclick="addPreset('葵涌廣場', 22.3575, 114.1275, '補給站')">🛍️ 葵涌廣場</div>
+          <div class="chip" onclick="addPreset('迪士尼樂園', 22.3130, 114.0413, '離島避難')">🏰 迪士尼樂園</div>
+          <div class="chip" onclick="addPreset('海洋公園', 22.2467, 114.1758, '天然良港/避風塘')">🐬 海洋公園</div>
+          <div class="chip" onclick="addPreset('山頂纜車', 22.2778, 114.1592, '高地瞭望')">🚡 山頂纜車</div>
+          <div class="chip" onclick="addPreset('香港仔避風塘', 22.2475, 114.1555, '補給站')">🐟 香港仔避風塘</div>
+          <div class="chip" onclick="addPreset('赤柱', 22.2185, 114.2155, '天然良港/避風塘')">🏖️ 赤柱</div>
+          <div class="chip" onclick="addPreset('新都會廣場', 22.3570, 114.1265, '補給站')">🏢 新都會廣場</div>
+          <div class="chip" onclick="addPreset('西九龍中心', 22.3308, 114.1601, '補給站')">🛍️ 西九龍中心</div>
+          <div class="chip" onclick="addPreset('尖沙咀', 22.2988, 114.1722, '高地瞭望')">🌃 尖沙咀</div>
+          <div class="chip" onclick="addPreset('中環', 22.2819, 114.1581, '補給站')">🏙️ 中環</div>
+        </div>
+      </div>
+
+      <!-- 3. Station List -->
+      <div class="section-block" style="flex:1;">
+        <div class="section-title" style="justify-content: space-between;">
+          <span>🚩 逃亡路線站點序列 (<span id="station-count">0</span>/8)</span>
+          <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: normal;">🔒 1站與終站已固定</span>
+        </div>
+
+        <div id="station-list" class="station-list">
+          <!-- Dynamic cards -->
+        </div>
+      </div>
+
+      <!-- 4. Score Dashboard -->
+      <div class="section-block">
+        <div class="section-title">📊 路線智能評估與成就解鎖</div>
+        <div class="score-card">
+          <div class="score-metrics">
+            <div>
+              <div class="metric-val" id="score-hist">0</div>
+              <div class="metric-lbl">歷史合理性</div>
+            </div>
+            <div>
+              <div class="metric-val" id="score-geo">0</div>
+              <div class="metric-lbl">地理可行性</div>
+            </div>
+            <div>
+              <div class="metric-val" id="score-creative">0</div>
+              <div class="metric-lbl">現代創意融合</div>
+            </div>
+          </div>
+          <div class="badge-container" id="badges-list">
+            <!-- Dynamic Badges -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-bar">
+        <button class="btn btn-secondary" onclick="resetRoute()">🗑️ 重置為預設三站</button>
+        <button class="btn btn-primary" onclick="generateReport()">📄 生成提案匯報書</button>
+      </div>
+
+    </div>
+
+    <!-- Right SVG Map Panel -->
+    <div class="map-container">
+      
+      <!-- Top Floating Info Bar -->
+      <div class="map-overlay-top">
+        <div class="map-title-badge">
+          <h2>🗺️ 現代香港大冒險戰術地圖</h2>
+          <p>點擊地圖上的地標加入中間站點（起點與終點已鎖定）</p>
+        </div>
+      </div>
+
+      <!-- Landmark Hint Banner Toast -->
+      <div class="landmark-hint-banner" id="landmark-hint">
+        💡 點擊或移至地圖上的精選地標，探索逃亡線索！
+      </div>
+
+      <!-- Enemy Warning Alert Toast -->
+      <div id="enemy-alert" class="alert-banner">
+        ⚠️ 警告：路線太接近新界北邊界！元軍騎兵正從北方包抄，極易被截擊！
+      </div>
+
+      <!-- SVG Vector Map Engine -->
+      <svg id="svg-map" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <pattern id="wave-pattern" width="60" height="20" patternUnits="userSpaceOnUse">
+            <path d="M 0 10 Q 15 5, 30 10 T 60 10" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+          </pattern>
+        </defs>
+
+        <!-- Ocean Water Background -->
+        <rect width="100%" height="100%" fill="#38bdf8"/>
+        <rect width="100%" height="100%" fill="url(#wave-pattern)"/>
+
+        <!-- Yuan Army Northern Border Zone -->
+        <rect x="0" y="0" width="1000" height="100" class="map-border-zone" />
+        <g transform="translate(500, 35)">
+          <text fill="#ef4444" font-size="14" font-weight="900" text-anchor="middle" letter-spacing="1">☠️ 元軍騎兵陸路南下高危警戒區 (新界北/深圳河邊界)</text>
+        </g>
+        <text x="120" y="60" fill="#ef4444" font-size="24">🐎</text>
+        <text x="880" y="60" fill="#ef4444" font-size="24">🐎</text>
+
+        <!-- Hong Kong Vector Coastline Shapes -->
+        <path class="map-land" d="M 120,100 L 920,100 L 950,230 L 900,300 L 820,260 L 760,290 L 680,250 L 640,300 L 560,330 L 530,410 L 460,410 L 430,360 L 350,380 L 290,350 L 230,380 L 160,330 L 110,230 Z" />
+        <path class="map-land" d="M 110,460 L 280,420 L 350,470 L 310,550 L 210,570 L 120,520 Z" />
+        <path class="map-land" d="M 450,440 L 620,430 L 690,480 L 640,540 L 510,530 L 440,470 Z" />
+        <path class="map-land" d="M 450,560 L 500,550 L 520,620 L 460,640 Z" />
+
+        <!-- 14 EXCLUSIVE LANDMARKS -->
+        <!-- 1. 九龍城宋皇台 (FIXED START) -->
+        <g class="map-landmark" onclick="onLandmarkClick('九龍城宋皇台', 22.3255, 114.1887, '起點駐蹕：昔日官富場，設臨時行宮整頓士氣。利用九龍城舊區小巷與宋皇台公園隱蔽。', '駐蹕/行宮')" transform="translate(520,285)">
+          <text font-size="28" text-anchor="middle">🗿</text>
+          <text y="20" class="map-school-label" text-anchor="middle">九龍城宋皇台 (起點)</text>
+        </g>
+
+        <!-- 2. 荃灣 -->
+        <g class="map-landmark" onclick="onLandmarkClick('荃灣', 22.3706, 114.1150, '史載宋室曾停留荃灣一帶避難，可利用現代荃灣海濱與西碼頭。', '天然良港/避風塘')" transform="translate(435,310)">
+          <text font-size="26" text-anchor="middle">⚓</text>
+          <text y="20" class="map-school-label" text-anchor="middle">荃灣</text>
+        </g>
+
+        <!-- 3. 大嶼山 (FIXED END) -->
+        <g class="map-landmark" onclick="onLandmarkClick('大嶼山', 22.2650, 113.9000, '離島終點防線：乘船遠離陸路追兵，利用大嶼山連綿山勢與離島港灣掩護，準備離開香港。', '離島避難')" transform="translate(210,510)">
+          <text font-size="26" text-anchor="middle">🏝️</text>
+          <text y="20" class="map-school-label" text-anchor="middle">大嶼山 (終點)</text>
+        </g>
+
+        <!-- 4. 棉紡會中學 -->
+        <g class="map-landmark" onclick="onLandmarkClick('棉紡會中學', 22.3582, 114.1264, '學校基地：位於葵涌山麓，作為小組後勤指揮部或現代物資轉運站！', '補給站')" transform="translate(485,335)">
+          <circle r="16" fill="#fef08a" stroke="#d97706" stroke-width="3" />
+          <text font-size="22" text-anchor="middle" y="2">🏫</text>
+          <text y="24" class="map-school-label" text-anchor="middle">棉紡會中學</text>
+        </g>
+
+        <!-- 5. 葵涌廣場 -->
+        <g class="map-landmark" onclick="onLandmarkClick('葵涌廣場', 22.3575, 114.1275, '現代商場補給：人流極度密集的商場！利用小吃街與商場人流藏匿補充物資。', '補給站')" transform="translate(495,355)">
+          <text font-size="22" text-anchor="middle">🛍️</text>
+          <text y="16" class="map-feature-label" text-anchor="middle">葵涌廣場</text>
+        </g>
+
+        <!-- 6. 迪士尼樂園 -->
+        <g class="map-landmark" onclick="onLandmarkClick('迪士尼樂園', 22.3130, 114.0413, '竹篙灣登陸點：位於大嶼山東部海岸，適合水路秘密登陸與避難。', '離島避難')" transform="translate(351,412)">
+          <text font-size="24" text-anchor="middle">🏰</text>
+          <text y="18" class="map-feature-label" text-anchor="middle">迪士尼樂園</text>
+        </g>
+
+        <!-- 7. 海洋公園 -->
+        <g class="map-landmark" onclick="onLandmarkClick('海洋公園', 22.2467, 114.1758, '港島南區海岸：鄰近深水灣海岸，可作為海路秘密停泊據點與哨站！', '天然良港/避風塘')" transform="translate(565,522)">
+          <text font-size="24" text-anchor="middle">🐬</text>
+          <text y="18" class="map-feature-label" text-anchor="middle">海洋公園</text>
+        </g>
+
+        <!-- 8. 山頂纜車 -->
+        <g class="map-landmark" onclick="onLandmarkClick('山頂纜車', 22.2778, 114.1592, '高地通道：登上太平山頂瞭望台，俯瞰維港海面敵情！', '高地瞭望')" transform="translate(538,470)">
+          <text font-size="22" text-anchor="middle">🚡</text>
+          <text y="16" class="map-feature-label" text-anchor="middle">山頂纜車</text>
+        </g>
+
+        <!-- 9. 香港仔避風塘 -->
+        <g class="map-landmark" onclick="onLandmarkClick('香港仔避風塘', 22.2475, 114.1555, '南區補給：利用港島南區漁類統營處與補給碼頭採購糧食。', '補給站')" transform="translate(515,500)">
+          <text font-size="22" text-anchor="middle">🐟</text>
+          <text y="16" class="map-feature-label" text-anchor="middle">香港仔避風塘</text>
+        </g>
+
+        <!-- 10. 赤柱 -->
+        <g class="map-landmark" onclick="onLandmarkClick('赤柱', 22.2185, 114.2155, '港島南端避風灣：適合停泊船隻補充淡水。', '天然良港/避風塘')" transform="translate(600,535)">
+          <text font-size="22" text-anchor="middle">🏖️</text>
+          <text y="16" class="map-feature-label" text-anchor="middle">赤柱</text>
+        </g>
+
+        <!-- 11. 新都會廣場 -->
+        <g class="map-landmark" onclick="onLandmarkClick('新都會廣場', 22.3570, 114.1265, '葵芳交通樞紐：利用地鐵站與商場穿梭進行情報傳遞與轉移。', '補給站')" transform="translate(470,355)">
+          <text font-size="22" text-anchor="middle">🏢</text>
+          <text y="16" class="map-feature-label" text-anchor="middle">新都會廣場</text>
+        </g>
+
+        <!-- 12. 西九龍中心 -->
+        <g class="map-landmark" onclick="onLandmarkClick('西九龍中心', 22.3308, 114.1601, '深水埗商圈：適合進行後勤採購與情報傳遞。', '補給站')" transform="translate(485,305)">
+          <text font-size="22" text-anchor="middle">🛍️</text>
+          <text y="16" class="map-feature-label" text-anchor="middle">西九龍中心</text>
+        </g>
+
+        <!-- 13. 尖沙咀 -->
+        <g class="map-landmark" onclick="onLandmarkClick('尖沙咀', 22.2988, 114.1722, '維港要衝：觀察對岸港島動向與海峽航道。', '高地瞭望')" transform="translate(520,380)">
+          <text font-size="22" text-anchor="middle">🌃</text>
+          <text y="16" class="map-feature-label" text-anchor="middle">尖沙咀</text>
+        </g>
+
+        <!-- 14. 中環 -->
+        <g class="map-landmark" onclick="onLandmarkClick('中環', 22.2819, 114.1581, '港島核心：可作為密林與現代建築遮蔽點。', '補給站')" transform="translate(520,440)">
+          <text font-size="24" text-anchor="middle">🏙️</text>
+          <text y="18" class="map-feature-label" text-anchor="middle">中環</text>
+        </g>
+
+        <!-- Regional Base Labels -->
+        <text x="540" y="260" class="map-label">九龍半島</text>
+        <text x="540" y="490" class="map-label">香港島</text>
+        <text x="530" y="415" class="map-label" fill="#0369a1" font-size="13">維港海峽</text>
+        <text x="440" y="600" class="map-label">南丫島</text>
+
+        <!-- Dynamic Route Lines, Markers & Animated Ship Group -->
+        <g id="svg-routes"></g>
+        <g id="svg-markers"></g>
+        <text id="animated-ship" class="ship-icon" font-size="32" x="-50" y="-50">⛵</text>
+      </svg>
+
+      <!-- Map Controls -->
+      <div class="map-controls">
+        <button class="map-btn" onclick="zoomMap(1.15)" title="放大">+</button>
+        <button class="map-btn" onclick="zoomMap(0.85)" title="縮小">-</button>
+        <button class="map-btn" onclick="resetMapTransform()" title="重置視圖">⟲</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal: Printable Proposal Report -->
+  <div id="report-modal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="report-header">
+        <h2>📜 南宋末帝「現代香港大冒險」路線提案書</h2>
+        <p style="color: #64748b; font-size: 0.9rem; font-weight: bold; margin-top:4px;">結合歷史考證與現代城市空間之創新研判報告</p>
+      </div>
+
+      <div class="report-grid">
+        <div><strong>👤 學生姓名：</strong><span id="rep-name">-</span></div>
+        <div><strong>🏫 班別：</strong><span id="rep-class">-</span></div>
+        <div><strong>🔢 學號：</strong><span id="rep-no">-</span></div>
+      </div>
+
+      <!-- Map Display Container in Report -->
+      <h3 style="color:#0369a1; margin-bottom: 10px;">一、逃亡路線地圖軌跡</h3>
+      <div id="rep-map-container" class="report-map-box">
+        <!-- Cloned SVG Map will be dynamically rendered here -->
+      </div>
+
+      <h3 style="color:#0369a1; margin-bottom: 10px;">二、逃亡路線站點明細</h3>
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th width="8%">站次</th>
+            <th width="22%">地點名稱</th>
+            <th width="25%">逃亡功能/類型</th>
+            <th width="45%">現代設施「古代化」利用與創意說明</th>
+          </tr>
+        </thead>
+        <tbody id="rep-table-body">
+          <!-- Dynamic Content -->
+        </tbody>
+      </table>
+
+      <h3 style="color:#0369a1; margin-bottom: 10px;">三、路線可行性與邏輯評估報告</h3>
+      <div style="background: #f0fdf4; border: 2px solid #86efac; padding: 16px; border-radius: 12px; font-size: 0.92rem; line-height: 1.6;">
+        <p><strong>🛡️ 智能綜合評分：</strong> <span id="rep-score-summary"></span></p>
+        <p style="margin-top:6px;"><strong>🏆 解鎖榮譽成就：</strong> <span id="rep-badges-summary"></span></p>
+        <p style="margin-top:6px;"><strong>💡 導師評語與優化建議：</strong> <span id="rep-diagnosis"></span></p>
+      </div>
+
+      <div style="margin-top: 25px; display: flex; justify-content: flex-end; gap: 12px;">
+        <button class="btn btn-secondary" onclick="closeModal()">關閉</button>
+        <button class="btn btn-primary" onclick="window.print()">🖨️ 列印 / 存為 PDF 報告</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Engine Logic -->
+  <script>
+    // State Store
+    let stations = [];
+    let mapScale = 1;
+
+    // Projection Box
+    const HK_BOUNDS = {
+      minLng: 113.82, maxLng: 114.45,
+      minLat: 22.14, maxLat: 22.56
+    };
+    const SVG_WIDTH = 1000;
+    const SVG_HEIGHT = 700;
+
+    function lngLatToSVG(lng, lat) {
+      const x = ((lng - HK_BOUNDS.minLng) / (HK_BOUNDS.maxLng - HK_BOUNDS.minLng)) * SVG_WIDTH;
+      const y = SVG_HEIGHT - (((lat - HK_BOUNDS.minLat) / (HK_BOUNDS.maxLat - HK_BOUNDS.minLat)) * SVG_HEIGHT);
+      return { x: Math.round(x), y: Math.round(y) };
+    }
+
+    function showHint(text) {
+      document.getElementById('landmark-hint').innerText = text;
+    }
+
+    // Initialize Default Fixed Boundary Route: 
+    // Station 1 & Station 3 keep default descriptions; Station 2 (荃湾) description is empty for students to type!
+    function initDefaultRoute() {
+      const p1 = lngLatToSVG(114.1887, 22.3255);
+      const p2 = lngLatToSVG(114.1150, 22.3706);
+      const p3 = lngLatToSVG(113.9000, 22.2650);
+
+      stations = [
+        { id: 'start-fixed', name: '九龍城宋皇台', lat: 22.3255, lng: 114.1887, x: p1.x, y: p1.y, tag: '駐蹕/行宮', desc: '起點駐蹕：昔日官富場，設臨時行宮整頓士氣。利用九龍城舊區小巷與宋皇台公園隱蔽。', isFixedStart: true },
+        { id: Date.now() + 1, name: '荃灣', lat: 22.3706, lng: 114.1150, x: p2.x, y: p2.y, tag: '天然良港/避風塘', desc: '', isFixedStart: false },
+        { id: 'end-fixed', name: '大嶼山', lat: 22.2650, lng: 113.9000, x: p3.x, y: p3.y, tag: '離島避難', desc: '離島終點防線：乘船遠離陸路追兵，利用大嶼山連綿山勢與離島港灣掩護，準備離開香港。', isFixedEnd: true }
+      ];
+      render();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initDefaultRoute();
+    });
+
+    // Handle Map Landmark Click
+    function onLandmarkClick(name, lat, lng, hintText, tag) {
+      showHint(`📍 ${name}：${hintText}`);
+      addPreset(name, lat, lng, tag);
+    }
+
+    // Add Preset / Station (Intermediate station description is ALWAYS empty '')
+    function addPreset(name, lat, lng, tag = '天然良港/避風塘') {
+      if (name === '九龍城宋皇台' || name === '大嶼山') {
+        alert(`🔒 「${name}」已為固定邊界站點（起點或終點），無法重複新增！`);
+        return;
+      }
+      if (stations.some(s => s.name === name)) {
+        alert(`⚠️ 「${name}」已經在逃亡路線中！`);
+        return;
+      }
+      if (stations.length >= 8) {
+        alert('⚠️ 逃亡路線站點序列已達上限（最多只可設定 8 個站點）！');
+        return;
+      }
+
+      const svgPt = lngLatToSVG(lng, lat);
+      const newStation = {
+        id: Date.now() + Math.random(),
+        name, lat, lng, x: svgPt.x, y: svgPt.y, tag, desc: '' // Empty description for students to complete
+      };
+
+      // Insert right before the last station (大嶼山)
+      stations.splice(stations.length - 1, 0, newStation);
+      render();
+    }
+
+    // Delete Station (Prevent deleting fixed start/end)
+    function removeStation(id) {
+      const idx = stations.findIndex(s => s.id === id);
+      if (idx === 0 || idx === stations.length - 1) {
+        alert('🔒 第一站（九龍城宋皇台）與最後一站（大嶼山）為固定邊界據點，無法刪除！');
+        return;
+      }
+      stations.splice(idx, 1);
+      render();
+    }
+
+    // Move Station (Prevent moving out of middle range)
+    function moveStation(index, direction) {
+      const targetIndex = index + direction;
+      if (index <= 0 || index >= stations.length - 1) return;
+      if (targetIndex <= 0 || targetIndex >= stations.length - 1) return;
+
+      const temp = stations[index];
+      stations[index] = stations[targetIndex];
+      stations[targetIndex] = temp;
+      render();
+    }
+
+    // Main Render Pipeline
+    function render() {
+      renderStationList();
+      renderSVGMap();
+      calculateScores();
+      document.getElementById('station-count').innerText = stations.length;
+    }
+
+    // Render Left Sidebar Cards
+    function renderStationList() {
+      const container = document.getElementById('station-list');
+      container.innerHTML = '';
+
+      stations.forEach((st, idx) => {
+        const isStart = (idx === 0);
+        const isEnd = (idx === stations.length - 1);
+        const isLocked = isStart || isEnd;
+
+        let cardClass = 'station-card';
+        if (isStart) cardClass += ' locked-start-card';
+        if (isEnd) cardClass += ' locked-end-card';
+
+        let badgeHtml = '';
+        if (isStart) badgeHtml = `<span class="station-badge-lock badge-start">🔒 第一站 (固定起點)</span>`;
+        if (isEnd) badgeHtml = `<span class="station-badge-lock badge-end">🔒 最後一站 (固定終點)</span>`;
+
+        const card = document.createElement('div');
+        card.className = cardClass;
+        card.innerHTML = `
+          <div class="station-header">
+            <span class="station-index">${idx + 1}</span>
+            <span class="station-name">${st.name}</span>
+            ${badgeHtml}
+            <div class="station-controls">
+              <button class="btn-icon" onclick="moveStation(${idx}, -1)" ${isLocked || idx === 1 ? 'disabled' : ''}>▲</button>
+              <button class="btn-icon" onclick="moveStation(${idx}, 1)" ${isLocked || idx === stations.length - 2 ? 'disabled' : ''}>▼</button>
+              <button class="btn-icon" onclick="removeStation('${st.id}')" style="color:#ef4444;" ${isLocked ? 'disabled' : ''}>✕</button>
+            </div>
+          </div>
+          <div class="station-body">
+            <select onchange="updateStation('${st.id}', 'tag', this.value)">
+              <option value="駐蹕/行宮" ${st.tag === '駐蹕/行宮' ? 'selected' : ''}>🏰 駐蹕 / 長期行宮</option>
+              <option value="天然良港/避風塘" ${st.tag === '天然良港/避風塘' ? 'selected' : ''}>⚓ 天然良港 / 避風停泊</option>
+              <option value="離島避難" ${st.tag === '離島避難' ? 'selected' : ''}>🏝️ 離島 / 遠離追兵</option>
+              <option value="補給站" ${st.tag === '補給站' ? 'selected' : ''}>🐟 漁港 / 水塘補給站</option>
+              <option value="高地瞭望" ${st.tag === '高地瞭望' ? 'selected' : ''}>⛰️ 高地 / 追兵觀察</option>
+            </select>
+            <textarea placeholder="請寫下現代設施如何『古代化』利用（例如：利用街市補給、利用纜車登頂觀景）..." onchange="updateStation('${st.id}', 'desc', this.value)">${st.desc || ''}</textarea>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function updateStation(id, key, val) {
+      const st = stations.find(s => s.id == id);
+      if (st) {
+        st[key] = val;
+        calculateScores();
+      }
+    }
+
+    // Render SVG Map Elements
+    function renderSVGMap() {
+      const routesGroup = document.getElementById('svg-routes');
+      const markersGroup = document.getElementById('svg-markers');
+      const ship = document.getElementById('animated-ship');
+
+      routesGroup.innerHTML = '';
+      markersGroup.innerHTML = '';
+
+      if (stations.length > 1) {
+        const pointsAttr = stations.map(s => `${s.x},${s.y}`).join(' ');
+        const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        polyline.setAttribute('points', pointsAttr);
+        polyline.setAttribute('class', 'route-line');
+        routesGroup.appendChild(polyline);
+
+        const lastSt = stations[stations.length - 1];
+        ship.setAttribute('x', lastSt.x - 16);
+        ship.setAttribute('y', lastSt.y - 20);
+      }
+
+      stations.forEach((st, idx) => {
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        let markerClass = 'station-marker';
+        if (idx === 0) markerClass += ' start';
+        if (idx === stations.length - 1) markerClass += ' end';
+        
+        g.setAttribute('class', markerClass);
+        g.setAttribute('transform', `translate(${st.x}, ${st.y})`);
+
+        g.innerHTML = `
+          <circle r="16"></circle>
+          <text y="1">${idx + 1}</text>
+          <text x="22" y="4" class="station-tag-label">${st.name}</text>
+        `;
+
+        markersGroup.appendChild(g);
+      });
+    }
+
+    // Score Calculation Logic
+    function calculateScores() {
+      let scoreHist = 50;
+      let scoreGeo = 50;
+      let scoreCreative = 40;
+      let enemyAlert = false;
+      let badges = [];
+
+      if (stations.length === 0) {
+        updateScoreUI(0, 0, 0, []);
+        return;
+      }
+
+      let islandCount = 0;
+      let harborCount = 0;
+
+      stations.forEach(st => {
+        if (st.y < 110) {
+          scoreHist -= 25;
+          scoreGeo -= 20;
+          enemyAlert = true;
+        }
+
+        if (st.tag === '離島避難') islandCount++;
+        if (st.tag === '天然良港/避風塘') harborCount++;
+
+        if (st.tag === '天然良港/避風塘' || st.tag === '離島避難') {
+          scoreHist += 10;
+          scoreGeo += 10;
+        }
+
+        if (st.desc && st.desc.length > 8) {
+          scoreCreative += 15;
+        }
+      });
+
+      if (stations.length >= 4) badges.push('🏆 海上大探險家');
+      if (islandCount >= 2) badges.push('🏝️ 離島避難專家');
+      if (harborCount >= 2) badges.push('⚓ 避風港灣達人');
+      if (scoreCreative >= 75) badges.push('💡 現代腦洞大師');
+      if (enemyAlert) badges.push('⚠️ 陷陣高危預警');
+
+      scoreHist = Math.min(100, Math.max(10, scoreHist));
+      scoreGeo = Math.min(100, Math.max(10, scoreGeo));
+      scoreCreative = Math.min(100, Math.max(10, scoreCreative));
+
+      updateScoreUI(scoreHist, scoreGeo, scoreCreative, badges);
+
+      const alertElem = document.getElementById('enemy-alert');
+      if (enemyAlert) alertElem.classList.add('active');
+      else alertElem.classList.remove('active');
+    }
+
+    function updateScoreUI(h, g, c, badges) {
+      document.getElementById('score-hist').innerText = h;
+      document.getElementById('score-geo').innerText = g;
+      document.getElementById('score-creative').innerText = c;
+
+      const badgeBox = document.getElementById('badges-list');
+      badgeBox.innerHTML = '';
+      badges.forEach(b => {
+        const span = document.createElement('span');
+        span.className = 'badge-item';
+        span.innerText = b;
+        badgeBox.appendChild(span);
+      });
+    }
+
+    function resetRoute() {
+      initDefaultRoute();
+    }
+
+    function zoomMap(factor) {
+      mapScale *= factor;
+      mapScale = Math.max(0.7, Math.min(2.2, mapScale));
+      document.getElementById('svg-map').style.transform = `scale(${mapScale})`;
+      document.getElementById('svg-map').style.transformOrigin = 'center center';
+    }
+
+    function resetMapTransform() {
+      mapScale = 1;
+      document.getElementById('svg-map').style.transform = `scale(1)`;
+    }
+
+    function generateReport() {
+      if (stations.length === 0) {
+        alert('請先建立逃亡站點！');
+        return;
+      }
+
+      document.getElementById('rep-name').innerText = document.getElementById('student-name').value || '未填寫';
+      document.getElementById('rep-class').innerText = document.getElementById('student-class').value || '未填寫';
+      document.getElementById('rep-no').innerText = document.getElementById('student-no').value || '未填寫';
+
+      const mapContainer = document.getElementById('rep-map-container');
+      mapContainer.innerHTML = '';
+      const svgMapNode = document.getElementById('svg-map').cloneNode(true);
+      svgMapNode.removeAttribute('id');
+      svgMapNode.style.transform = 'none';
+      mapContainer.appendChild(svgMapNode);
+
+      const tbody = document.getElementById('rep-table-body');
+      tbody.innerHTML = '';
+
+      stations.forEach((st, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${idx + 1}</strong></td>
+          <td>${st.name}</td>
+          <td><span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:12px; font-weight:bold; font-size:0.78rem;">${st.tag}</span></td>
+          <td>${st.desc || '（未提供詳細古化利用說明）'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const h = document.getElementById('score-hist').innerText;
+      const g = document.getElementById('score-geo').innerText;
+      const c = document.getElementById('score-creative').innerText;
+
+      document.getElementById('rep-score-summary').innerText = `歷史邏輯：${h}分 | 地理可行性：${g}分 | 現代創意：${c}分`;
+
+      const badgeElems = document.querySelectorAll('.badge-item');
+      let badgeArr = [];
+      badgeElems.forEach(el => badgeArr.push(el.innerText));
+      document.getElementById('rep-badges-summary').innerText = badgeArr.length > 0 ? badgeArr.join('、') : '無';
+      
+      let diag = '';
+      if (parseInt(h) >= 80 && parseInt(g) >= 80) {
+        diag = '這是一條高明無比的逃亡路線！第一站由九龍城宋皇台啟程，最終撤退回大嶼山屏障，避開北方追兵並巧妙融合現代設施！';
+      } else if (document.getElementById('enemy-alert').classList.contains('active')) {
+        diag = '警告：路線過於深入新界北陸路邊界，宋室逃亡以水路為主，極易遭受元軍騎兵包抄！建議轉向沿海與離島。';
+      } else {
+        diag = '路線整體結構不錯，建議發揮更多想像力，說明現代設施（如碼頭、街市、山頂纜車）如何被「古代化」利用！';
+      }
+      document.getElementById('rep-diagnosis').innerText = diag;
+
+      document.getElementById('report-modal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('report-modal').classList.remove('active');
+    }
+  </script>
+</body>
+</html>
